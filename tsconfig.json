@@ -2,6 +2,11 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "_version": "20.1.0",
   "compilerOptions": {
+    "types": [
+      "node",
+      "fastify"
+    ],
+    "jsx": "react",
     "module": "node16",
     "moduleResolution": "node16",
     "target": "es2022",

@@ -12,7 +12,17 @@ POST http://localhost:3333/payments/create
 Content-Type: application/json
 
 {
-   "cpf": "12345678909",
+    "cpf": "12345678909",
     "name": "Ruan Pinheiro",
     "amount": 1092
+}
+
+###
+POST http://localhost:3333/users/create
+Content-Type: application/json
+
+{
+    "name": "Jean",
+    "surname": "Ruan Pinheiro",
+    "email": "lopesjean81@gmail.com"
 }

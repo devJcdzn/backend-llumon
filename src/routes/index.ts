@@ -1,4 +1,5 @@
 import type { FastifyTypedInstance } from "../types";
+import { gatewayRoutes } from "./gateways";
 
 export async function routes(app: FastifyTypedInstance) {
   app.get("/hello-world", (_req, res) => {
@@ -6,4 +7,5 @@ export async function routes(app: FastifyTypedInstance) {
       hello: "world",
     });
   });
+  app.register(gatewayRoutes, { prefix: "/gateways" });
 }

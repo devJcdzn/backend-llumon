@@ -1,0 +1,8 @@
+POST http://localhost:3333/gateways/add
+Content-Type: application/json
+
+{
+   "gatewayName": "abacate",
+    "gatewayAPIKey": "string",
+    "gatewaySecretKey": "string"
+}

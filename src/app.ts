@@ -8,6 +8,7 @@ import {
 
 import { fastifySwagger } from "@fastify/swagger";
 import { fastifySwaggerUi } from "@fastify/swagger-ui";
+import { env } from "./env";
 import { routes } from "./routes";
 
 const app = fastify().withTypeProvider();
@@ -17,6 +18,10 @@ app.setSerializerCompiler(serializerCompiler);
 
 app.register(fastifyCors, {
   origin: "*",
+});
+
+app.register(require("@fastify/jwt"), {
+  secret: env.JWT_SECRET,
 });
 
 app.register(fastifySwagger, {

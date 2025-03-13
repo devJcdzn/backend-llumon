@@ -11,6 +11,7 @@ const envSchema = z.object({
   EFI_PROD_URL: z.string().url(),
   EFI_PROD_CLIENT_ID: z.string(),
   EFI_PROD_CLIENT_SECRET: z.string(),
+  JWT_SECRET: z.string(),
 });
 
 export const env = envSchema.parse(process.env);

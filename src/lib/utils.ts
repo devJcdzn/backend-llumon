@@ -16,7 +16,6 @@ const agent = new https.Agent({
 const data = JSON.stringify({ grant_type: "client_credentials" });
 
 const credentials = `${CLIENT_ID}:${CLIENT_SECRET}`;
-console.log(credentials);
 
 const auth = Buffer.from(credentials).toString("base64");
 
@@ -29,8 +28,6 @@ export async function getAccessToken() {
       },
       httpsAgent: agent,
     });
-
-    console.log(response);
 
     return {
       agent,

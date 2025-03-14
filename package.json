@@ -20,6 +20,7 @@
     "@react-email/components": "^0.0.33",
     "@types/react": "^19.0.10",
     "axios": "^1.8.3",
+    "bull": "^4.16.5",
     "drizzle-orm": "^0.40.0",
     "fastify": "^5.2.1",
     "fastify-type-provider-zod": "^4.0.2",

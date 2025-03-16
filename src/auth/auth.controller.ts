@@ -31,4 +31,14 @@ export const AuthController = {
       message: result.message,
     });
   },
+
+  async validate(request: FastifyRequest, reply: FastifyReply) {
+    try {
+    } catch (err) {
+      return reply.code(500).send({
+        success: false,
+        message: (err as Error).message,
+      });
+    }
+  },
 };

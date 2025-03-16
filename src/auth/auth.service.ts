@@ -1,14 +1,14 @@
 import { env } from "../env";
 import { QueueJobs } from "../jobs";
 import { generateOTP } from "../lib/utils";
-import { UserRepository } from "../user/repository/user.repository";
+import { DrizzleAuthRepository } from "./repository/drizzle.auth.repository";
 
-const userRepository = new UserRepository();
+const authRepository = new DrizzleAuthRepository();
 
 export const AuthService = {
   async login(email: string) {
     try {
-      const result = await userRepository.checkUserByEmail(email);
+      const result = await authRepository.checkUserByEmail(email);
 
       if (!result.success) {
         return {
@@ -20,7 +20,7 @@ export const AuthService = {
 
       const otpCode = generateOTP();
 
-      await userRepository.updateData(result.data, { otpCode });
+      await authRepository.setUserOtp(otpCode, email);
 
       const obj = {
         from: "delivered@resend.dev",
@@ -40,11 +40,18 @@ export const AuthService = {
       };
     } catch (err) {
       console.log(err);
-      return {
-        success: false,
-        code: 500,
-        message: "Error interno ao fazer login",
-      };
+      throw new Error("Erro ao fazer login");
+    }
+  },
+
+  async validate(otpCode: string, userEmail: string) {
+    try {
+      const result = await authRepository.validateUserOtp(otpCode, userEmail);
+
+      return result;
+    } catch (err) {
+      console.log(err);
+      throw new Error("Erro ao validar código.");
     }
   },
 };

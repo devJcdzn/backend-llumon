@@ -7,6 +7,13 @@ interface LoginRequest extends FastifyRequest {
   };
 }
 
+interface ValidateCodeRequest extends FastifyRequest {
+  query: {
+    email: string;
+    code: string;
+  };
+}
+
 export const AuthController = {
   async login(request: LoginRequest, reply: FastifyReply) {
     const { email } = request.body;
@@ -32,8 +39,27 @@ export const AuthController = {
     });
   },
 
-  async validate(request: FastifyRequest, reply: FastifyReply) {
+  async validate(request: ValidateCodeRequest, reply: FastifyReply) {
+    const { code, email } = request.query;
+
+    if (!code || !email) {
+      reply.code(401).send({
+        success: false,
+        message: "Não autorizado",
+      });
+    }
+
     try {
+      const result = await AuthService.validate(code, email);
+
+      if (!result?.success) {
+        return;
+      }
+
+      return reply.code(result.code).send({
+        success: result.success,
+        data: result.data,
+      });
     } catch (err) {
       return reply.code(500).send({
         success: false,

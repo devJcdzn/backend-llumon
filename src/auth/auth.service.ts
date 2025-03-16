@@ -1,3 +1,4 @@
+import { app } from "../app";
 import { env } from "../env";
 import { QueueJobs } from "../jobs";
 import { generateOTP } from "../lib/utils";
@@ -48,7 +49,16 @@ export const AuthService = {
     try {
       const result = await authRepository.validateUserOtp(otpCode, userEmail);
 
-      return result;
+      if (!result.success) return;
+
+      const payload = { userEmail };
+      const token = app.jwt.sign(payload, { expiresIn: "24h" });
+
+      return {
+        success: result.success,
+        code: result.code,
+        data: token,
+      };
     } catch (err) {
       console.log(err);
       throw new Error("Erro ao validar código.");

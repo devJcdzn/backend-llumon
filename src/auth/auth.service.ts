@@ -1,20 +1,11 @@
 import { env } from "../env";
 import { QueueJobs } from "../jobs";
+import { generateOTP } from "../lib/utils";
 import { UserRepository } from "../user/repository/user.repository";
 
 const userRepository = new UserRepository();
 
 export const AuthService = {
-  generateOTP() {
-    let digits = "0123456789";
-    let OTP = "";
-    let len = digits.length;
-    for (let i = 0; i < 6; i++) {
-      OTP += digits[Math.floor(Math.random() * len)];
-    }
-    return OTP;
-  },
-
   async login(email: string) {
     try {
       const result = await userRepository.checkUserByEmail(email);
@@ -27,7 +18,7 @@ export const AuthService = {
         };
       }
 
-      const otpCode = this.generateOTP();
+      const otpCode = generateOTP();
 
       await userRepository.updateData(result.data, { otpCode });
 

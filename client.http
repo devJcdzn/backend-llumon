@@ -26,3 +26,11 @@ Content-Type: application/json
     "surname": "Ruan Pinheiro",
     "email": "lopesjean81@gmail.com"
 }
+
+###
+POST http://localhost:3333/auth/login
+Content-Type: application/json
+
+{
+    "email": "lopesjean81@gmail.com"
+}

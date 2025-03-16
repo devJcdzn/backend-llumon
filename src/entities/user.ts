@@ -4,6 +4,7 @@ export interface UserDTO {
   name: string;
   surname: string;
   cpf?: string;
+  otpCode?: string;
   email: string;
 }
 
@@ -11,6 +12,7 @@ export class User {
   public id: string;
   public name: string;
   public surname: string;
+  public otpCode?: string;
   public cpf?: string;
   public email: string;
 

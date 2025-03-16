@@ -7,7 +7,7 @@ export const users = pgTable("users", {
   surname: text("surname").notNull(),
   email: text("email").notNull().unique(),
 
-  otCode: text("otp_code"),
+  otpCode: text("otp_code"),
   validatedEmailAt: timestamp("validated_email_at", { withTimezone: true }),
 
   apiKey: text("api_key").unique(),

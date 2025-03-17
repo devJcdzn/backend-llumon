@@ -1,5 +1,4 @@
 import { User } from "../entities/user";
-import { env } from "../env";
 import { QueueJobs } from "../jobs";
 import { generateOTP } from "../lib/utils";
 import type { IUserRepository } from "./repository/interface";
@@ -28,8 +27,6 @@ export class UserService {
 
     await this.userRepository.createUser(user);
 
-    const queue = new QueueJobs(env.REDIS_URL);
-
     const obj = {
       from: "Team llumonpay<delivered@resend.dev>",
       to: ["lopesjean81@gmail.com"],
@@ -37,7 +34,7 @@ export class UserService {
       otpCode,
     };
 
-    queue.emailValidate(obj);
+    this.mailQueue.emailValidate(obj);
 
     return {
       message: "Usuário criado.",

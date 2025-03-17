@@ -1,5 +1,5 @@
 import { User } from "../entities/user";
-import { QueueJobs } from "../jobs";
+import type { QueueJobs } from "../jobs/bull-mail-jobs";
 import { generateOTP } from "../lib/utils";
 import type { IUserRepository } from "./repository/interface";
 

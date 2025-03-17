@@ -10,6 +10,7 @@ import jwt from "@fastify/jwt";
 import { fastifySwagger } from "@fastify/swagger";
 import { fastifySwaggerUi } from "@fastify/swagger-ui";
 import { env } from "./env";
+import { ApiError } from "./helpers/error";
 import { routes } from "./routes";
 
 const app = fastify().withTypeProvider();
@@ -50,5 +51,19 @@ app.register(fastifySwaggerUi, {
 });
 
 app.register(routes);
+app.setErrorHandler((error, request, reply) => {
+  if (error instanceof ApiError) {
+    return reply.status(error.statusCode).send({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  console.error("Erro inesperado:", error);
+  return reply.status(500).send({
+    success: false,
+    message: "Erro interno no servidor.",
+  });
+});
 
 export { app };

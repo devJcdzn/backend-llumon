@@ -8,56 +8,37 @@ const authRepository = new DrizzleAuthRepository();
 
 export const AuthService = {
   async login(email: string) {
-    try {
-      const result = await authRepository.checkUserByEmail(email);
+    await authRepository.checkUserByEmail(email);
 
-      if (!result.success) {
-        return {
-          code: result.code,
-          success: result.success,
-          message: result.data,
-        };
-      }
+    const otpCode = generateOTP();
 
-      const otpCode = generateOTP();
+    await authRepository.setUserOtp(otpCode, email);
 
-      await authRepository.setUserOtp(otpCode, email);
+    const obj = {
+      from: "delivered@resend.dev",
+      to: ["lopesjean81@gmail.com"],
+      subject: "Código de verificação llumon",
+      otpCode,
+    };
 
-      const obj = {
-        from: "delivered@resend.dev",
-        to: ["lopesjean81@gmail.com"],
-        subject: "Código de verificação llumon",
-        otpCode,
-      };
+    const queue = new QueueJobs(env.REDIS_URL);
 
-      const queue = new QueueJobs(env.REDIS_URL);
+    queue.emailValidate(obj);
 
-      queue.emailValidate(obj);
-
-      return {
-        success: true,
-        code: 200,
-        message: "Email para login enviado.",
-      };
-    } catch (err) {
-      console.log(err);
-      throw new Error("Erro ao fazer login");
-    }
+    return {
+      message: "Email para login enviado.",
+    };
   },
 
   async validate(otpCode: string, userEmail: string) {
     try {
       const result = await authRepository.validateUserOtp(otpCode, userEmail);
 
-      if (!result.success) return;
-
       const payload = { userEmail };
       const token = app.jwt.sign(payload, { expiresIn: "24h" });
 
       return {
-        success: result.success,
-        code: result.code,
-        data: token,
+        accessToken: token,
       };
     } catch (err) {
       console.log(err);

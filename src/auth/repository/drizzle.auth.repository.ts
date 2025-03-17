@@ -1,113 +1,64 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db/drizzle";
 import { users } from "../../db/drizzle/schema";
+import { ApiError } from "../../helpers/error";
 import type { IAuthRepository } from "./interface";
 
 export class DrizzleAuthRepository implements IAuthRepository {
-  async checkUserByEmail(
-    email: string
-  ): Promise<{ code: number; success: boolean; data: string }> {
-    try {
-      const result = await db
+  async checkUserByEmail(email: string): Promise<string> {
+    const result = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, email));
+
+    if (!result.length) {
+      throw ApiError.NotFound("Usuário não encontrado.");
+    }
+
+    return result[0].id;
+  }
+
+  async setUserOtp(otp: string, email: string): Promise<void> {
+    return db.transaction(async (tx) => {
+      const user = await tx
         .select({ id: users.id })
         .from(users)
         .where(eq(users.email, email));
 
-      if (!result || result.length === 0) {
-        return {
-          code: 404,
-          success: false,
-          data: "Usuário não encontrado",
-        };
+      if (!user.length) {
+        throw ApiError.NotFound("Usuário não encontrado.");
       }
 
-      return {
-        code: 200,
-        success: true,
-        data: result[0].id,
-      };
-    } catch (err) {
-      return {
-        code: 500,
-        success: false,
-        data: (err as Error).message,
-      };
-    }
+      const updated = await tx
+        .update(users)
+        .set({ otpCode: otp })
+        .where(eq(users.id, user[0].id));
+
+      if (!updated.rowCount) {
+        throw ApiError.InternalError("Erro ao atualizar OTP.");
+      }
+    });
   }
 
-  async setUserOtp(
-    otp: string,
-    email: string
-  ): Promise<void | { code: number; success: boolean; data: string }> {
-    try {
-      return await db.transaction(async (tx) => {
-        const result = await tx
-          .select({ id: users.id })
-          .from(users)
-          .where(eq(users.email, email));
+  async validateUserOtp(userOtp: string, userEmail: string): Promise<void> {
+    return db.transaction(async (tx) => {
+      const user = await tx
+        .select({ id: users.id })
+        .from(users)
+        .where(and(eq(users.email, userEmail), eq(users.otpCode, userOtp)));
 
-        if (!result || result.length === 0) {
-          return {
-            code: 500,
-            success: false,
-            data: "User not found.",
-          };
-        }
+      if (!user.length) {
+        throw ApiError.Unauthorized();
+      }
 
-        tx.update(users)
-          .set({
-            otpCode: otp,
-          })
-          .where(eq(users.id, result[0].id));
-      });
-    } catch (err) {
-      console.log(err);
-      return {
-        code: 500,
-        success: false,
-        data: (err as Error).message,
-      };
-    }
-  }
+      const updated = await tx
+        .update(users)
+        .set({ otpCode: null })
+        .where(eq(users.email, userEmail));
 
-  async validateUserOtp(
-    userOtp: string,
-    userEmail: string
-  ): Promise<{ code: number; success: boolean; data: string }> {
-    try {
-      return await db.transaction(async (tx) => {
-        const result = await tx
-          .select({ id: users.id })
-          .from(users)
-          .where(and(eq(users.email, userEmail), eq(users.otpCode, userOtp)));
-
-        if (!result || result.length === 0) {
-          return {
-            code: 500,
-            success: false,
-            data: "User not found.",
-          };
-        }
-
-        tx.update(users)
-          .set({
-            otpCode: null,
-          })
-          .where(eq(users.email, userEmail));
-
-        return {
-          code: 200,
-          success: true,
-          data: "Otp verificado",
-        };
-      });
-    } catch (err) {
-      console.log(err);
-      return {
-        code: 500,
-        success: false,
-        data: (err as Error).message,
-      };
-    }
+      if (!updated.rowCount) {
+        throw ApiError.InternalError("Erro ao limpar OTP.");
+      }
+    });
   }
 }

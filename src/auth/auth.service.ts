@@ -1,18 +1,20 @@
 import { app } from "../app";
-import { env } from "../env";
 import { QueueJobs } from "../jobs";
 import { generateOTP } from "../lib/utils";
-import { DrizzleAuthRepository } from "./repository/drizzle.auth.repository";
+import type { IAuthRepository } from "./repository/interface";
 
-const authRepository = new DrizzleAuthRepository();
+export class AuthService {
+  constructor(
+    private readonly authRepository: IAuthRepository,
+    private readonly mailQueue: QueueJobs
+  ) {}
 
-export const AuthService = {
   async login(email: string) {
-    await authRepository.checkUserByEmail(email);
+    await this.authRepository.checkUserByEmail(email);
 
     const otpCode = generateOTP();
 
-    await authRepository.setUserOtp(otpCode, email);
+    await this.authRepository.setUserOtp(otpCode, email);
 
     const obj = {
       from: "delivered@resend.dev",
@@ -21,18 +23,16 @@ export const AuthService = {
       otpCode,
     };
 
-    const queue = new QueueJobs(env.REDIS_URL);
-
-    queue.emailValidate(obj);
+    this.mailQueue.emailValidate(obj);
 
     return {
       message: "Email para login enviado.",
     };
-  },
+  }
 
   async validate(otpCode: string, userEmail: string) {
     try {
-      const result = await authRepository.validateUserOtp(otpCode, userEmail);
+      await this.authRepository.validateUserOtp(otpCode, userEmail);
 
       const payload = { userEmail };
       const token = app.jwt.sign(payload, { expiresIn: "24h" });
@@ -44,5 +44,5 @@ export const AuthService = {
       console.log(err);
       throw new Error("Erro ao validar código.");
     }
-  },
-};
+  }
+}

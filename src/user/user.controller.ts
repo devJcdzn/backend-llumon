@@ -10,7 +10,9 @@ interface CreateUserRequest extends FastifyRequest {
   };
 }
 
-export const UserController = {
+export class UserController {
+  constructor(private readonly userService: UserService) {}
+
   async createUser(request: CreateUserRequest, reply: FastifyReply) {
     const { name, surname, email } = request.body;
 
@@ -19,11 +21,15 @@ export const UserController = {
     }
 
     try {
-      const result = await UserService.createUser({ name, surname, email });
+      const result = await this.userService.createUser({
+        name,
+        surname,
+        email,
+      });
 
       return HttpResponse.success(reply, result);
     } catch (err) {
       return reply.send(err);
     }
-  },
-};
+  }
+}

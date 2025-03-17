@@ -2,7 +2,7 @@ import { User } from "../entities/user";
 import { env } from "../env";
 import { QueueJobs } from "../jobs";
 import { generateOTP } from "../lib/utils";
-import { DrizzleUserRepository } from "./repository/drizzle.user.repository";
+import type { IUserRepository } from "./repository/interface";
 
 interface UserData {
   name: string;
@@ -10,9 +10,12 @@ interface UserData {
   email: string;
 }
 
-const userRepository = new DrizzleUserRepository();
+export class UserService {
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly mailQueue: QueueJobs
+  ) {}
 
-export const UserService = {
   async createUser(userData: UserData) {
     const otpCode = generateOTP();
 
@@ -23,7 +26,7 @@ export const UserService = {
       otpCode,
     });
 
-    await userRepository.createUser(user);
+    await this.userRepository.createUser(user);
 
     const queue = new QueueJobs(env.REDIS_URL);
 
@@ -39,5 +42,5 @@ export const UserService = {
     return {
       message: "Usuário criado.",
     };
-  },
-};
+  }
+}

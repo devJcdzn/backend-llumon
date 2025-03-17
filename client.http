@@ -34,3 +34,11 @@ Content-Type: application/json
 {
     "email": "lopesjean81@gmail.com"
 }
+
+###
+GET http://localhost:3333/auth/validate?email=lopesjean81@gmail.com&code=346969
+Content-Type: application/json
+
+{
+    "email": "lopesjean81@gmail.com"
+}

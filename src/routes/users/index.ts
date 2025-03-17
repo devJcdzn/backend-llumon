@@ -1,6 +1,6 @@
 import type { FastifyTypedInstance } from "@types";
 import { env } from "../../env";
-import { QueueJobs } from "../../jobs";
+import { QueueJobs } from "../../jobs/bull-mail-jobs";
 import { DrizzleUserRepository } from "../../user/repository/drizzle.user.repository";
 import { UserController } from "../../user/user.controller";
 import { UserService } from "../../user/user.service";

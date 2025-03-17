@@ -3,8 +3,13 @@ import { AuthController } from "../../auth/auth.controller";
 import { AuthService } from "../../auth/auth.service";
 import { DrizzleAuthRepository } from "../../auth/repository/drizzle.auth.repository";
 import { env } from "../../env";
-import { QueueJobs } from "../../jobs";
-import { loginRequestSchema, loginResponseSchema } from "./schema";
+import { QueueJobs } from "../../jobs/bull-mail-jobs";
+import {
+  loginRequestSchema,
+  loginResponseSchema,
+  validateRequestSchema,
+  validateResponseSchema,
+} from "./schema";
 
 export async function authRoutes(app: FastifyTypedInstance) {
   const authRepository = new DrizzleAuthRepository();
@@ -22,5 +27,17 @@ export async function authRoutes(app: FastifyTypedInstance) {
       },
     },
     (req, res) => authController.login(req, res)
+  );
+
+  app.get(
+    "/validate",
+    {
+      schema: {
+        description: "Envia email com OTP.",
+        querystring: validateRequestSchema,
+        response: validateResponseSchema,
+      },
+    },
+    (req, res) => authController.validate(req, res)
   );
 }

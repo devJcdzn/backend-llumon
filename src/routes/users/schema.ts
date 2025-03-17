@@ -7,12 +7,18 @@ export const createUserRequest = z.object({
 });
 
 export const createUserResponse = {
-  201: z.object({
+  200: z.object({
     success: z.boolean().default(true),
-    message: z.string().default("Usuário criado com sucesso."),
+    message: z.string().default("Operação realizada com sucesso."),
+    data: z.object({
+      message: z.string(),
+    }),
   }),
   400: z.object({
     success: z.boolean().default(false),
-    message: z.string().default("Informações faltando."),
+    message: z.string().default("Erro na operação."),
+    data: z.object({
+      message: z.string(),
+    }),
   }),
 };

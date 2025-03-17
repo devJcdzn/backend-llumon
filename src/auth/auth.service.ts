@@ -1,5 +1,5 @@
 import { app } from "../app";
-import { QueueJobs } from "../jobs";
+import type { QueueJobs } from "../jobs/bull-mail-jobs";
 import { generateOTP } from "../lib/utils";
 import type { IAuthRepository } from "./repository/interface";
 

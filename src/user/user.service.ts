@@ -2,7 +2,7 @@ import { User } from "../entities/user";
 import { env } from "../env";
 import { QueueJobs } from "../jobs";
 import { generateOTP } from "../lib/utils";
-import { UserRepository } from "./repository/user.repository";
+import { DrizzleUserRepository } from "./repository/drizzle.user.repository";
 
 interface UserData {
   name: string;
@@ -10,7 +10,7 @@ interface UserData {
   email: string;
 }
 
-const userRepository = new UserRepository();
+const userRepository = new DrizzleUserRepository();
 
 export const UserService = {
   async createUser(userData: UserData) {
@@ -23,32 +23,21 @@ export const UserService = {
       otpCode,
     });
 
-    try {
-      await userRepository.createUser(user);
+    await userRepository.createUser(user);
 
-      const queue = new QueueJobs(env.REDIS_URL);
+    const queue = new QueueJobs(env.REDIS_URL);
 
-      const obj = {
-        from: "Team llumonpay<delivered@resend.dev>",
-        to: ["lopesjean81@gmail.com"],
-        subject: "Boas vindas! - Código de verificação llumon",
-        otpCode,
-      };
+    const obj = {
+      from: "Team llumonpay<delivered@resend.dev>",
+      to: ["lopesjean81@gmail.com"],
+      subject: "Boas vindas! - Código de verificação llumon",
+      otpCode,
+    };
 
-      queue.emailValidate(obj);
+    queue.emailValidate(obj);
 
-      return {
-        code: 201,
-        success: true,
-        message: "Usuário criado.",
-      };
-    } catch (err) {
-      console.log(err);
-      return {
-        code: 500,
-        success: false,
-        message: (err as Error).message,
-      };
-    }
+    return {
+      message: "Usuário criado.",
+    };
   },
 };

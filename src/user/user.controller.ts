@@ -1,4 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { HttpResponse } from "../helpers/http-response";
 import { UserService } from "./user.service";
 
 interface CreateUserRequest extends FastifyRequest {
@@ -14,17 +15,15 @@ export const UserController = {
     const { name, surname, email } = request.body;
 
     if (!name || !surname || !email) {
-      return reply.code(401).send({
-        success: false,
-        message: "Campos não preenchidos corretamente.",
-      });
+      return HttpResponse.badRequest(reply, "Campos obrigatórios faltando.");
     }
 
-    const result = await UserService.createUser({ name, surname, email });
+    try {
+      const result = await UserService.createUser({ name, surname, email });
 
-    return reply.code(result.code).send({
-      success: result.success,
-      message: result.message,
-    });
+      return HttpResponse.success(reply, result);
+    } catch (err) {
+      return reply.send(err);
+    }
   },
 };
